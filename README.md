@@ -28,6 +28,8 @@ YadBomb depends on some packages that should be installed in your **Linux** syst
 
 - navigate to de extracted folder by terminal i.e. `cd Downloads/YadBomb`
 
+- give 'execute' permission if needed: `chmod +x YadBomb`
+
 - run the script with the command: `sudo ./YadBomb`
 
 - follow the instructions given by the script
