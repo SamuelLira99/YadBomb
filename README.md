@@ -33,3 +33,7 @@ YadBomb depends on some packages that should be installed in your **Linux** syst
 - run the script with the command: `sudo ./YadBomb`
 
 - follow the instructions given by the script
+
+## Support
+
+You can open an issue on this repo, or join the [Wii Mini Hacking Discord](https://discord.gg/MYm9kB7)
