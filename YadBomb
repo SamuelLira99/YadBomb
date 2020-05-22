@@ -1,0 +1,165 @@
+#!/bin/bash
+
+################# Functions ##############
+checkPackages() {
+    echo "Checking packages..."
+    everything_installed=false
+    missing_packages=""
+
+    yad_installed=$(which yad)
+    is_yad_installed=${yad_installed:0:1}
+    # echo "\"$is_yad_installed\""
+
+    btmgmt_installed=$(which btmgmt)
+    is_btmgmt_installed=${btmgmt_installed:0:1}
+    # echo $is_btmgmt_installed
+
+    hciconfig_installed=$(which hciconfig)
+    is_hciconfig_installed=${hciconfig_installed:0:1}
+    # echo $is_hciconfig_installed
+
+    if [ "$is_yad_installed" != "/" ]
+        then
+            echo "package \"yad\" is not installed"
+    fi
+
+    if [ "$is_btmgmt_installed" != "/" ]
+        then
+            echo "package \"btmgmt\" is not installed"
+    fi
+
+    if  [ "$is_hciconfig_installed" != "/" ]
+        then
+            echo "package \"hciconfig\" is not installed"
+    fi
+
+
+    if [ "$is_yad_installed" != "/" ] || [ "$is_btmgmt_installed" != "/" ] || [ "$is_hciconfig_installed" != "/" ]
+        then
+            echo ""
+            echo "please, install the packages above and try again"
+            exit
+    fi
+}
+
+configureBluetooth() {
+    yad --title "YadBomb" \
+    --text="Configuring bluetooth..." \
+    --no-buttons --undecorated &
+
+    sleep 3
+
+    sudo systemctl disable --now bluetooth
+    sudo btmgmt select 0
+    sudo btmgmt connectable on
+    sudo btmgmt bondable on
+    sudo btmgmt discov on
+    sudo btmgmt power on
+
+    killall yad
+}
+
+configureHCI0() {
+    yad --title "YadBomb" \
+    --text="Configuring hci0..." \
+    --no-buttons --undecorated &
+
+    sleep 3
+
+    sudo hciconfig hci0 iac liac
+
+    killall yad
+}
+
+checkBluetoothSettings() {
+    yad --title "YadBomb" \
+    --text="the \"current settings\" message bellow must at least contain the following options (or more): powered connectable discoverable bondable br/edr \n\nIf everything is ok, click \"Continue\" \n\n$(btmgmt info | grep 'current settings')" \
+    --button="Exit":0 \
+    --button="Continue":1
+
+    choice=$?
+
+    # echo $choice
+
+    if [ $choice -eq 1 ]
+        then
+            configureHCI0
+            exploit
+    # elif [ $choice -eq 0 ]
+    #     then
+            # echo 'Canceled'
+    fi
+}
+
+exploit() {
+    cd bluebomb
+    chmod +x bluebomb-x86
+    # ls
+    yad --title "YadBomb" \
+    --text="Chose the region that applies to your console" \
+    --button="PAL":0 \
+    --button="USA":1
+
+    choice=$?
+
+    yad --title "YadBomb" \
+    --text="next you'll need to check the terminal \n\nif it displays \"waiting to accept\", you're almost done, just follow the steps below (after clicked OK button): \n\n\n1)Make sure that exactly one wiimote (without Motion Plus) is connected to the Wii Mini
+ \n2) Remove the batteries from that wiimote
+ \n3) Press the SYNC button on the Wii Mini a bunch of times. It may take quite a few button presses to work, \ndepending on the distance between Wii Mini and computer, and the quality of your bluetooth connection. \nJust spam the SYNC button for a while until the Terminal displays \"Got connection handle\" \n\n\nThen, the Wii Mini should boot the Hackmii installer after a few seconds. Once you are in the Hackmii installer, \nput the batteries back into the Wiimote and install the Homebrew Channel. \n\n\nWhen you're ready, click the OK button below" \
+    --button="OK":0 \
+    --fixed \
+    --center
+
+    # echo $choice
+
+    clear
+
+    if [ $choice -eq 1 ]
+        then
+            echo "Exploiting for USA console..."
+            sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin
+            # xfce4-terminal -e 'bash --fullscreen -c "echo Exploiting for USA console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin ; bash" -T YadBomb'
+            # xfce4-terminal -e 'bash -c "sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin ; bash" -T YadBomb'
+
+    elif [ $choice -eq 0 ]
+        then
+            echo Exploiting for PAL console...
+            sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin
+
+            # xfce4-terminal -e 'bash --fullscreen -c "echo Exploiting for PAL console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin ; bash" -T YadBomb'
+    fi
+
+}
+
+
+
+
+################# Main ###############
+checkPackages
+
+yad --title "YadBomb" \
+--text="This wizard will help you installing bluebomb, a software developed by Fullmetal5, following
+a guide wrote by Leseratte. This wizard won't install cIOS, only the HomeBrew Channel
+
+Bluebomb on github:
+https://github.com/Fullmetal5/bluebomb
+
+Leseratte\'s guide:
+https://forum.wii-homebrew.com/index.php/Thread/59342-Installing-Homebrew-on-the-Wii-Mini/
+
+Do you want to proceed?" \
+--button="No":0 \
+--button="Yes":1
+
+choice=$?
+
+# echo $choice
+
+if [ $choice -eq 1 ]
+    then
+        configureBluetooth
+        checkBluetoothSettings
+# elif [ $choice -eq 0 ]
+#     then
+#         echo 'Canceled'
+fi
