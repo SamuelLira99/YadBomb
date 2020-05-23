@@ -116,16 +116,18 @@ exploit() {
 
     if [ $choice -eq 1 ]
         then
-            echo "Exploiting for USA console..."
-            sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin
+            # echo "Exploiting for USA console..."
+            # sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin
+            xterm -T YadBomb -e /bin/bash -c "echo Exploiting for USA console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin ; echo FINISHED, you can close this window now, HAVE FUN! ; bash"
             # xfce4-terminal -e 'bash --fullscreen -c "echo Exploiting for USA console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin ; bash" -T YadBomb'
             # xfce4-terminal -e 'bash -c "sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin ; bash" -T YadBomb'
 
     elif [ $choice -eq 0 ]
         then
-            echo Exploiting for PAL console...
-            sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin
+            # echo Exploiting for PAL console...
+            # sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin
 
+            xterm -T YadBomb -e /bin/bash -c "echo Exploiting for USA console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin ; echo FINISHED, you can close this window now, HAVE FUN! ; bash"
             # xfce4-terminal -e 'bash --fullscreen -c "echo Exploiting for PAL console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin ; bash" -T YadBomb'
     fi
 
