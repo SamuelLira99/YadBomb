@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<app version="1.0">
+	<name>WAD-Manager</name>
+	<version>1.8</version>
+        <release_date>20110327000000</release_date>
+	<coder>Waninkoko/hamachi-mp</coder>
+	<short_description>Wad Manager 1.8</short_description>
+	<long_description>Instala wads usando AHBPROT
+
+Credits:
+Waninkoko: 98% trabajo en el programa
+Wii-Homebrew.com/Black.Pearl: imagen de fondo
+hamachi-mp: Opciones avanzadas
+kamikaze:traduccion
+
+Kudos:
+DevkitPro-Team
+Team Twiizers
+
+</long_description>
+  <no_ios_reload/>
+</app>
