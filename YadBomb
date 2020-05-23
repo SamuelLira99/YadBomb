@@ -20,24 +20,24 @@ checkPackages() {
 
     if [ "$is_yad_installed" != "/" ]
         then
-            echo "package \"yad\" is not installed"
+            missing_packages="${missing_packages}yad "
     fi
 
-    if [ "$is_btmgmt_installed" != "/" ]
+    if [ "$is_btmgmt_installed" != "/" ] || [ "$is_hciconfig_installed" != "/" ]
         then
-            echo "package \"btmgmt\" is not installed"
+            missing_packages="${missing_packages}bluez-tools "
     fi
 
-    if  [ "$is_hciconfig_installed" != "/" ]
-        then
-            echo "package \"hciconfig\" is not installed"
-    fi
+    # if  [ "$is_hciconfig_installed" != "/" ]
+    #     then
+    #         missing_packages="${missing_packages}package \"hciconfig\" is not installed $'\n'"
+    # fi
 
 
     if [ "$is_yad_installed" != "/" ] || [ "$is_btmgmt_installed" != "/" ] || [ "$is_hciconfig_installed" != "/" ]
         then
-            echo ""
-            echo "please, install the packages above and try again"
+            # xterm -T YadBomb -e /bin/bash -c "echo $missing_packages && echo 'please, install the packages above and try again' ; echo '' ; echo press any key to close ; read whiteln"
+            xterm -T YadBomb -e "/bin/bash dependency_installer.sh $missing_packages"
             exit
     fi
 }
@@ -49,12 +49,13 @@ configureBluetooth() {
 
     sleep 3
 
-    sudo systemctl disable --now bluetooth
-    sudo btmgmt select 0
-    sudo btmgmt connectable on
-    sudo btmgmt bondable on
-    sudo btmgmt discov on
-    sudo btmgmt power on
+    xterm -T YadBomb -e /bin/bash -c "echo 'Configuring bluetooth...' && sudo systemctl disable --now bluetooth && sudo btmgmt connectable on && sudo btmgmt bondable on && sudo btmgmt discov on && sudo btmgmt power on"
+    # sudo systemctl disable --now bluetooth
+    # sudo btmgmt select 0 # deprecated ?
+    # sudo btmgmt connectable on
+    # sudo btmgmt bondable on
+    # sudo btmgmt discov on
+    # sudo btmgmt power on
 
     killall yad
 }
@@ -66,7 +67,9 @@ configureHCI0() {
 
     sleep 3
 
-    sudo hciconfig hci0 iac liac
+    xterm -T YadBomb -e /bin/bash -c "echo Configuring hci0... && sudo hciconfig hci0 iac liac"
+
+    # sudo hciconfig hci0 iac liac
 
     killall yad
 }
