@@ -15,6 +15,8 @@ This software is NOT the exploit itself, it will just provide a **graphical** wa
 YadBomb depends on some packages that should be installed in your **Linux** system in order to work properly:
 - yad (Provides the GTK dialogs used in the script)
 
+- xterm (a terminal that is bound to X server)
+
 - btmgmt (a bluetooth management tool)
 
 - hciconfig (a bluetooth adapter setting tool)
@@ -26,11 +28,13 @@ YadBomb depends on some packages that should be installed in your **Linux** syst
 
 - [clone] or [download and extract] this repository into your **Linux** system
 
-- navigate to de extracted folder by terminal i.e. `cd Downloads/YadBomb`
+- give 'execute' permission if needed (alternatively you can just `chmod +x YadBomb`): 
+    - right-click `YadBomb` file
+    - properties
+    - permissions
+    - allow executing file as program
 
-- give 'execute' permission if needed: `chmod +x YadBomb`
-
-- run the script with the command: `sudo ./YadBomb`
+- double-click `YadBomb`
 
 - follow the instructions given by the script
 
