@@ -12,7 +12,7 @@ This software is NOT the exploit itself, it will just provide a **graphical** wa
 
 ## Dependencies
 
-YadBomb depends on some packages that should be installed in your **Linux** system in order to work properly:
+YadBomb depends on some packages that will automaticaly be installed in your **Linux** system in order to work properly:
 - yad (Provides the GTK dialogs used in the script)
 
 - xterm (a terminal that is bound to X server)
@@ -21,10 +21,12 @@ YadBomb depends on some packages that should be installed in your **Linux** syst
 
 - hciconfig (a bluetooth adapter setting tool)
 
+PS, xterm won't be installed automaticaly, but usually it's already installed by default, **if it's not installed**, just run:
+
+- `sudo apt install xterm -y` (Ubuntu/Debian/Mint)
+- `sudo pacman -S xterm --noconfirm` (Arch/Manjaro)
+
 ## Instructions
-
-- Install the dependencies above if you don't have some of them 
-
 
 - [clone] or [download and extract] this repository into your **Linux** system
 
