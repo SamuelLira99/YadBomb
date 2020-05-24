@@ -1,114 +1,87 @@
 #!/bin/bash
 
 ################# Functions ##############
-checkPackages() {
+checkPackages() { # check if YAD is installed
     echo "Checking packages..."
     everything_installed=false
     missing_packages=""
 
     yad_installed=$(which yad)
     is_yad_installed=${yad_installed:0:1}
-    # echo "\"$is_yad_installed\""
+    # echo $is_yad_installed
 
-    btmgmt_installed=$(which btmgmt)
-    is_btmgmt_installed=${btmgmt_installed:0:1}
-    # echo $is_btmgmt_installed
-
-    hciconfig_installed=$(which hciconfig)
-    is_hciconfig_installed=${hciconfig_installed:0:1}
-    # echo $is_hciconfig_installed
-
-    if [ "$is_yad_installed" != "/" ]
-        then
-            missing_packages="${missing_packages}yad "
-    fi
-
-    if [ "$is_btmgmt_installed" != "/" ] || [ "$is_hciconfig_installed" != "/" ]
-        then
-            missing_packages="${missing_packages}bluez-tools "
-    fi
-
-    # if  [ "$is_hciconfig_installed" != "/" ]
-    #     then
-    #         missing_packages="${missing_packages}package \"hciconfig\" is not installed $'\n'"
-    # fi
-
-
-    if [ "$is_yad_installed" != "/" ] || [ "$is_btmgmt_installed" != "/" ] || [ "$is_hciconfig_installed" != "/" ]
-        then
-            # xterm -T YadBomb -e /bin/bash -c "echo $missing_packages && echo 'please, install the packages above and try again' ; echo '' ; echo press any key to close ; read whiteln"
-            xterm -T YadBomb -e "/bin/bash dependency_installer.sh $missing_packages"
-            exit
-    fi
-}
-
-configureBluetooth() {
-    yad --title "YadBomb" \
-    --text="Configuring bluetooth..." \
-    --no-buttons --undecorated &
-
-    sleep 3
-
-    xterm -T YadBomb -e /bin/bash -c "echo 'Configuring bluetooth...' && sudo systemctl disable --now bluetooth && sudo btmgmt connectable on && sudo btmgmt bondable on && sudo btmgmt discov on && sudo btmgmt power on"
-    # sudo systemctl disable --now bluetooth
-    # sudo btmgmt select 0 # deprecated ?
-    # sudo btmgmt connectable on
-    # sudo btmgmt bondable on
-    # sudo btmgmt discov on
-    # sudo btmgmt power on
-
-    killall yad
-}
-
-configureHCI0() {
-    yad --title "YadBomb" \
-    --text="Configuring hci0..." \
-    --no-buttons --undecorated &
-
-    sleep 3
-
-    xterm -T YadBomb -e /bin/bash -c "echo Configuring hci0... && sudo hciconfig hci0 iac liac"
-
-    # sudo hciconfig hci0 iac liac
-
-    killall yad
-}
-
-checkBluetoothSettings() {
-    yad --title "YadBomb" \
-    --text="the \"current settings\" message bellow must at least contain the following options (or more): powered connectable discoverable bondable br/edr \n\nIf everything is ok, click \"Continue\" \n\n$(btmgmt info | grep 'current settings')" \
-    --button="Exit":0 \
-    --button="Continue":1
-
-    choice=$?
-
-    # echo $choice
-
-    if [ $choice -eq 1 ]
-        then
-            configureHCI0
-            exploit
-    # elif [ $choice -eq 0 ]
-    #     then
-            # echo 'Canceled'
+    if [ "$is_yad_installed" != "/" ]; then
+        xterm -T YadBomb -e "/bin/bash yad_installer.sh"
     fi
 }
 
 exploit() {
-    cd bluebomb
-    chmod +x bluebomb-x86
-    # ls
-    yad --title "YadBomb" \
-    --text="Chose the region that applies to your console" \
-    --button="PAL":0 \
-    --button="USA":1
+    arch=$(uname -m)
+
+    if [[ $arch == "x86_64" ]]; then
+        bluebomb_file="bluebomb-x64"
+    else
+        bluebomb_file="bluebomb-x86"
+    fi
+
+    cd bluebomb1.5
+    chmod +x $bluebomb_file
+    echo $bluebomb_file
+
+    options=""
+    cd stage0
+    for file in *.bin; do
+        if [[ $file != "RQFE6U.bin" ]]; then
+            options="${options}${file%.*}!"
+        fi
+    done
+    cd .. # bluebomb
+
+    options=${options%?} # cuts out the last char (an extra '!' sign)
+    # echo $options
+
+    form_data=$(yad --title "YadBomb" \
+    --text="    Choose the filename that contains your Device, System Menu, and Region" \
+    --form \
+    --field="   Choose your console and System Menu: ":CB \
+    "$options" \
+    --button="OK":0) \
+    # --button="USA":1
 
     choice=$?
 
+    bin_file=$(echo $form_data | awk 'BEGIN {FS="|"} {print $1}') # filename without extension
+    binfile="${bin_file}.bin" # filename with extension
+
+    echo "chosen \"$bin_file\""
+    echo "will use \"$binfile\""
+
     yad --title "YadBomb" \
-    --text="next you'll need to check the terminal \n\nif it displays \"waiting to accept\", you're almost done, just follow the steps below (after clicked OK button): \n\n\n1)Make sure that exactly one wiimote (without Motion Plus) is connected to the Wii Mini
- \n2) Remove the batteries from that wiimote
- \n3) Press the SYNC button on the Wii Mini a bunch of times. It may take quite a few button presses to work, \ndepending on the distance between Wii Mini and computer, and the quality of your bluetooth connection. \nJust spam the SYNC button for a while until the Terminal displays \"Got connection handle\" \n\n\nThen, the Wii Mini should boot the Hackmii installer after a few seconds. Once you are in the Hackmii installer, \nput the batteries back into the Wiimote and install the Homebrew Channel. \n\n\nWhen you're ready, click the OK button below" \
+    --text="    next you'll be redirected to a terminal
+
+    if it displays \"waiting to accept\", you're almost done, just follow the steps below (after clicked OK button):
+
+    1) Download HackMii Installer from this link: https://bootmii.org/download/
+
+    2) Copy everything from inside \"HackMii Installer\" to the root of your usb stick
+
+    3) Plug the usb stick to your console
+
+    4) Turn on your console till \"Health and Safety\" screen
+
+    5) Remove the batteries from all wiimotes
+
+    6) Make sure your console is close to your bluetooth adapter, you may have to move it closer to get it in range, this will depend on your adapter
+
+    7) Press the SYNC button on your console multiple times till the computer shows \"Got connection handle: #\".
+    You may have to press it (SYNC) several times in order to get such a message (Got connection handle).
+
+    Then, the Wii Mini should boot the Hackmii installer after a few seconds.
+    Once you are in the Hackmii installer, put the batteries back into the Wiimote and install the Homebrew Channel.
+
+
+    When you're ready, click the OK button below" \
+    --selectable-labels \
     --button="OK":0 \
     --fixed \
     --center
@@ -121,7 +94,8 @@ exploit() {
         then
             # echo "Exploiting for USA console..."
             # sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin
-            xterm -T YadBomb -e /bin/bash -c "echo Exploiting for USA console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin ; echo FINISHED, you can close this window now, HAVE FUN! ; bash"
+            # xterm -T YadBomb -e /bin/bash -c "sudo systemctl disable --now bluetooth && echo Exploiting for $bin_file... ; sudo ./${bluebomb_file} ./stage0/$binfile stage1.bin ; echo FINISHED, you can close this window now, HAVE FUN! ; bash"
+            echo "Back to ComboBox screen"
             # xfce4-terminal -e 'bash --fullscreen -c "echo Exploiting for USA console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin ; bash" -T YadBomb'
             # xfce4-terminal -e 'bash -c "sudo ./bluebomb-x86 ./stage0/MINI_SM_NTSC.bin stage1.bin ; bash" -T YadBomb'
 
@@ -130,7 +104,7 @@ exploit() {
             # echo Exploiting for PAL console...
             # sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin
 
-            xterm -T YadBomb -e /bin/bash -c "echo Exploiting for USA console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin ; echo FINISHED, you can close this window now, HAVE FUN! ; bash"
+            xterm -T YadBomb -e /bin/bash -c "echo Exploiting for $bin_file... && sudo systemctl disable --now bluetooth && sudo ./${bluebomb_file} ./stage0/$binfile stage1.bin ; echo FINISHED, you can close this window now, HAVE FUN! ; bash"
             # xfce4-terminal -e 'bash --fullscreen -c "echo Exploiting for PAL console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin ; bash" -T YadBomb'
     fi
 
@@ -143,16 +117,15 @@ exploit() {
 checkPackages
 
 yad --title "YadBomb" \
---text="This wizard will help you installing bluebomb, a software developed by Fullmetal5, following
-a guide wrote by Leseratte. This wizard won't install cIOS, only the HomeBrew Channel
+--text="    This wizard will help you installing bluebomb, a software developed by Fullmetal5
 
-Bluebomb on github:
-https://github.com/Fullmetal5/bluebomb
+    This wizard will NOT install any cIOS, only the Homebrew Channel
 
-Leseratte\'s guide:
-https://forum.wii-homebrew.com/index.php/Thread/59342-Installing-Homebrew-on-the-Wii-Mini/
+    Bluebomb on github:
+    https://github.com/Fullmetal5/bluebomb
 
-Do you want to proceed?" \
+    Do you want to proceed?" \
+--selectable-labels \
 --button="No":0 \
 --button="Yes":1
 
@@ -162,9 +135,6 @@ choice=$?
 
 if [ $choice -eq 1 ]
     then
-        configureBluetooth
-        checkBluetoothSettings
-# elif [ $choice -eq 0 ]
-#     then
-#         echo 'Canceled'
+        exploit
+        # checkBluetoothSettings
 fi
