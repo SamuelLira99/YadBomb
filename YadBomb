@@ -45,6 +45,7 @@ exploit() {
     --form \
     --field="   Choose your console and System Menu: ":CB \
     "$options" \
+    --field="Use external bluetooth adapter":CHK \
     --button="OK":0) \
     # --button="USA":1
 
@@ -53,8 +54,18 @@ exploit() {
     bin_file=$(echo $form_data | awk 'BEGIN {FS="|"} {print $1}') # filename without extension
     binfile="${bin_file}.bin" # filename with extension
 
+    external=$(echo $form_data | awk 'BEGIN {FS="|"} {print $2}')
+
+    if [ $external = TRUE ]; then
+        hci_device="1"
+    else
+        hci_device=""
+    fi
+
     echo "chosen \"$bin_file\""
     echo "will use \"$binfile\""
+
+    echo "HCI device: \"${hci_device}\""
 
     yad --title "YadBomb" \
     --text="    next you'll be redirected to a terminal
@@ -104,7 +115,7 @@ exploit() {
             # echo Exploiting for PAL console...
             # sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin
 
-            xterm -T YadBomb -e /bin/bash -c "echo Exploiting for $bin_file... && sudo systemctl disable --now bluetooth && sudo ./${bluebomb_file} ./stage0/$binfile stage1.bin ; echo FINISHED, you can close this window now, HAVE FUN! ; bash"
+            xterm -T YadBomb -e /bin/bash -c "echo Exploiting for $bin_file... && sudo systemctl disable --now bluetooth && sudo ./${bluebomb_file} ${hci_device} ./stage0/$binfile stage1.bin ; echo FINISHED, press ENTER to close and HAVE FUN! ; read enter"
             # xfce4-terminal -e 'bash --fullscreen -c "echo Exploiting for PAL console... ; sudo ./bluebomb-x86 ./stage0/MINI_SM_PAL.bin stage1.bin ; bash" -T YadBomb'
     fi
 
