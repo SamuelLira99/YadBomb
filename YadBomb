@@ -87,7 +87,7 @@ exploit() {
     7) Press the SYNC button on your console multiple times till the computer shows \"Got connection handle: #\".
     You may have to press it (SYNC) several times in order to get such a message (Got connection handle).
 
-    Then, the Wii Mini should boot the Hackmii installer after a few seconds.
+    Then, the console should boot the Hackmii installer after a few seconds.
     Once you are in the Hackmii installer, put the batteries back into the Wiimote and install the Homebrew Channel.
 
 
